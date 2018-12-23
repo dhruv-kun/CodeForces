@@ -1,1 +1,1 @@
-solution of codeforces in c++ and java
+solution of codeforces in c++,java and python
