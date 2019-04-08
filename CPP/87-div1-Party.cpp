@@ -2,56 +2,29 @@
 
 using namespace std;
 
-void assign_mgs(vector <int> &g, int s, unordered_set <int> &mgs) {
-    mgs.insert(s);
-    if (g[s] != -1)
-    assign_mgs(g, g[s] - 1, mgs);
-}
-
-int solution(vector <unordered_set <int>> &managers, int n) {
-    int groups = 0;
-    unordered_set <int> people;
-    for (int i = 0; i < n; i++)
-        people.insert(i);
-    vector <int> group;
-
-    while (!people.empty()) {
-        auto it = people.begin();
-        group.push_back(*it);
-        it = people.erase(it);
-        while (it != people.end()) {
-            bool dis = true;
-            for (int v: group) {
-                if (managers[*it].find(v) != managers[*it].end() ||
-                    managers[v].find(*it) != managers[v].end()) {
-                    dis = false;
-                    break;
-                }
-            }
-            if (dis) {
-                group.push_back(*it);
-                it = people.erase(it);
-            }
-            if (!dis)
-                it++;
-        }
-        group.clear();
-        groups++;
-    }
-    return groups;
+int depth(vector <vector <int>> &graph, int root) {
+    if (graph[root].empty())
+        return 1;
+    int max_depth = 0;
+    for (int v: graph[root])
+        max_depth = max(max_depth, depth(graph, v));
+    return max_depth + 1;
 }
 
 int main() {
     int n; cin >> n;
-    vector <int> graph(n);
-    for (int i = 0; i < n; i++)
-        cin >> graph[i];
-    vector <unordered_set <int>> managers(n);
+    vector <vector <int>> trees(n);
+    vector <int> roots;
     for (int i = 0; i < n; i++) {
-        assign_mgs(graph, i, managers[i]);
-        managers[i].erase(i);
+        int v; cin >> v;
+        if (v != -1)
+            trees[v - 1].push_back(i);
+        else
+            roots.push_back(i);
     }
-    int groups = solution(managers, n);
-    cout << groups << endl;
+    int max_depth = 0;
+    for (int root: roots)
+        max_depth = max(max_depth, depth(trees, root));
+    cout << max_depth << endl;
     return 0;
 }
