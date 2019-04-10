@@ -2,27 +2,45 @@
 
 using namespace std;
 
+void minimize_cost(vector <vector <pair <int, int>>> &graph, int start, vector <long long int> &costs, int c) {
+    for (pair <int, int> v: graph[start]) {
+        if (costs[v.first] > c + v.second) {
+            costs[v.first] = c + v.second;
+            minimize_cost(graph, v.first, costs, c + v.second);
+        }
+    }
+}
+
+
 int main() {
     const int inf = 1e9 + 7;
 
     int n, m, k; cin >> n >> m >> k;
-    vector <vector <int>> roads(m, vector <int>(3));
-    for (int i = 0; i < m; i++)
-        for (int j = 0; j < 3; j++)
-            cin >> roads[i][j];
-    unordered_set <int> flour_storages;
+    vector <vector <pair <int, int>>> graph(n);
+    for (int i = 0; i < m; i++) {
+        int u, v, w; cin >> u >> v >> w;
+        graph[u - 1].push_back(make_pair(v - 1, w));
+        graph[v - 1].push_back(make_pair(u - 1, w));
+    }
+    vector <bool> flour_storages(n);
     for (int i = 0; i < k; i++) {
         int t; cin >> t;
-        flour_storages.insert(t);
+        flour_storages[t - 1] = true;
     }
 
-    int min_rubles = inf;
-    for (int i = 0; i < m; i++) {
-        bool a = flour_storages.find(roads[i][0]) == flour_storages.end();
-        bool b = flour_storages.find(roads[i][1]) == flour_storages.end();
 
-        if (a ^ b)
-            min_rubles = min(min_rubles, roads[i][2]);
+    vector <long long int> costs(n, inf);
+    for (int i = 0; i < n; i++)
+        if (flour_storages[i])
+            costs[i] = 0;
+    for (int i = 0; i < n; i++) {
+        if (flour_storages[i])
+            minimize_cost(graph, i, costs, 0);
+    }
+    int min_rubles = inf;
+    for (int i = 0; i < n; i++) {
+        if (!flour_storages[i] && costs[i] < min_rubles)
+            min_rubles = costs[i];
     }
     if (min_rubles == inf)
         min_rubles = -1;
